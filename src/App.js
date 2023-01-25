@@ -4,7 +4,11 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-        <SimpleGraph width="300" height="300" />
+        <SimpleGraph width="300" height="300" vertices={[
+            {key: "One"},
+            {key: "Two"},
+            {key: "Three"},
+        ]} />
     </div>
   );
 }
@@ -12,12 +16,11 @@ function App() {
 function SimpleGraph(props) {
     return (
         <svg width={props.width} height={props.height}>
+            <rect x="0" y="0" width={props.width} height={props.height} fill="lightgrey" />
             <g>
-                <circle cx="0" cy="0" r="5" />
-                <circle cx={props.width} cy="0" r="5" />
-                <circle cx="0" cy={props.height} r="5" />
-                <circle cx={props.width} cy={props.height} r="5" />
-                <circle cx={props.width / 2} cy={props.height / 2} r="5" />
+                {
+                    props.vertices.map((v) => <circle key={v.key} cx={Math.random() * props.width} cy={Math.random() * props.height} r="5" />)
+                }
             </g>
         </svg>
     );
