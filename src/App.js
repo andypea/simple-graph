@@ -4,22 +4,23 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <SimpleGraph width="300" height="300" />
     </div>
   );
+}
+
+function SimpleGraph(props) {
+    return (
+        <svg width={props.width} height={props.height}>
+            <g>
+                <circle cx="0" cy="0" r="5" />
+                <circle cx={props.width} cy="0" r="5" />
+                <circle cx="0" cy={props.height} r="5" />
+                <circle cx={props.width} cy={props.height} r="5" />
+                <circle cx={props.width / 2} cy={props.height / 2} r="5" />
+            </g>
+        </svg>
+    );
 }
 
 export default App;
