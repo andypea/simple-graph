@@ -77,6 +77,8 @@ const Vertex = (props) => {
 }
 
 const Draggable = (props) => {
+    // TODO: Does this work on Safari (I believe it has a bug in `getScreenCTM`.
+
     const thisVertex = useRef(null);
 
     const [position, setPosition] = useState({x:0, y:0});
