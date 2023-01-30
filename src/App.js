@@ -17,6 +17,8 @@ function SimpleGraph(props) {
     // TODO: Update verticesPositions when props.vertices changes.
     // TODO: Copy all properties across when copying objects.
     // TODO: Bug: if SimpleGraph width or height is specified as a percentage.
+    // TODO: Check is the dragging works correctly in Safari.
+    // TODO: Vertices shouldn't need to pass their own ID to the move, freeze, unfreeze, etc. functions.
 
     const [verticesPositions, setVerticesPositions] = useState(props.vertices.map((v) => ({
         id: v.id, 
@@ -59,12 +61,32 @@ function SimpleGraph(props) {
             })));
     }
 
+    const freezeVertex = (id) => {
+        setVerticesPositions((oldVerticesPositions) => oldVerticesPositions.map((v) => ({
+            ...v,
+            frozen: (v.id === id) ? true : v.frozen
+        })));
+    };
+    
+    const unfreezeVertex = (id) => {
+        setVerticesPositions((oldVerticesPositions) => oldVerticesPositions.map((v) => ({
+            ...v,
+            frozen: (v.id === id) ? false : v.frozen
+        })));
+    };
+
     return (
         <svg width={props.width} height={props.height}>
             <rect x="0" y="0" width={props.width} height={props.height} fill="lightgrey" />
             <g>
                 {
-                    verticesPositions.map((v) => <Vertex key={v.id} id={v.id} cx={v.cx} cy={v.cy} moveVertex={moveVertex} />)
+                    verticesPositions.map((v) => <Vertex key={v.id} 
+                                                         id={v.id} 
+                                                         cx={v.cx} 
+                                                         cy={v.cy} 
+                                                         moveVertex={moveVertex} 
+                                                         freezeVertex={freezeVertex}
+                                                         unfreezeVertex={unfreezeVertex}/>)
                 }
             </g>
         </svg>
@@ -82,6 +104,7 @@ const Vertex = (props) => {
         thisVertex.current.setPointerCapture(event.pointerId);
         
         setDragging(true);
+        props.freezeVertex(props.id);
             
         const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
         const pointerScreenPosition = new DOMPointReadOnly(event.pageX, event.pageY);
@@ -100,6 +123,7 @@ const Vertex = (props) => {
     
     const handleOnPointerUp = (event) => {
         setDragging(false);
+        props.unfreezeVertex(props.id);
         thisVertex.current.releasePointerCapture(event.pointerId);
     };
 
