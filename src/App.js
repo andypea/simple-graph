@@ -73,7 +73,46 @@ function SimpleGraph(props) {
 }
 
 const Vertex = (props) => {
-    return <circle id={props.id} cx={props.cx} cy={props.cy} r="20" />
+    // TODO: Does this work on Safari (I believe it has a bug in `getScreenCTM`.
+
+    const thisVertex = useRef(null);
+    const [dragging, setDragging] = useState(false);
+    const [offset, setOffset] = useState({x: 0, y: 0});
+
+    const handleOnPointerDown = (event) => {
+        thisVertex.current.setPointerCapture(event.pointerId);
+        
+        setDragging(true);
+            
+        const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
+        const pointerScreenPosition = new DOMPointReadOnly(event.pageX, event.pageY);
+        const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
+        setOffset({x: pointerLocalPosition.x - props.cx, y: pointerLocalPosition.y - props.cy});
+    };
+    
+    const handleOnPointerMove = (event) => {
+        if (dragging) {
+            const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
+            const pointerScreenPosition = new DOMPointReadOnly(event.pageX, event.pageY);
+            const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
+            props.moveVertex(props.id, {x: pointerLocalPosition.x - offset.x, y: pointerLocalPosition.y - offset.y});
+        }
+    };
+    
+    const handleOnPointerUp = (event) => {
+        setDragging(false);
+        thisVertex.current.releasePointerCapture(event.pointerId);
+    };
+
+    return <circle id={props.id} 
+                   cx={props.cx} 
+                   cy={props.cy} 
+                   r="20" 
+                   onPointerDown={handleOnPointerDown} 
+                   onPointerMove={handleOnPointerMove} 
+                   onPointerUp={handleOnPointerUp} 
+                   ref={thisVertex}
+                   />
 }
 
 const Draggable = (props) => {
