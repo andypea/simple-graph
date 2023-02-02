@@ -29,29 +29,39 @@ function SimpleGraph(props) {
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
         {
-        cx: Math.random() * props.width, 
-        cy: Math.random() * props.height,
-        vx: 0,
-        vy: 0,
-        frozen: false 
-    }]))));
+            cx: Math.random() * props.width, 
+            cy: Math.random() * props.height,
+            vx: 0,
+            vy: 0,
+            frozen: false 
+        }]))));
 
     const timeStep = 0.005;
-    const friction = 0.01;
+    const friction = 10;
     
     useEffect(() => {
         let frameId = null;
 
         function onFrame() {
             setVerticesPositions(
-                (oldVerticesPositions) => new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
-                    ...entry[1],
-                    cx: (entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx) % props.width,
-                    cy: (entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy) % props.height,
-                    vx: entry[1].frozen ? 0 : (entry[1].vx - timeStep * Math.sign(entry[1].cx - props.width / 2) * Math.pow(entry[1].cx - props.width / 2, 2) - friction * entry[1].vx),
-                    vy: entry[1].frozen ? 0 : (entry[1].vy - timeStep * Math.sign(entry[1].cy - props.width / 2) * Math.pow(entry[1].cy - props.width / 2, 2) - friction * entry[1].vy)
-                }]))
-            );
+                (oldVerticesPositions) => {
+            
+                    const forces = new Map();
+                    for (const entry of oldVerticesPositions.entries()) {
+                        forces.set(entry[0], 
+                            {
+                                x: - Math.sign(entry[1].cx - props.width / 2) * Math.pow(entry[1].cx - props.width / 2, 2) - friction * entry[1].vx, 
+                                y: - Math.sign(entry[1].cy - props.width / 2) * Math.pow(entry[1].cy - props.width / 2, 2) - friction * entry[1].vy
+                            });
+                    }
+
+                    return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
+                        ...entry[1],
+                        cx: (entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx) % props.width,
+                        cy: (entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy) % props.height,
+                        vx: entry[1].frozen ? 0 : (entry[1].vx + timeStep * forces.get(entry[0]).x),
+                        vy: entry[1].frozen ? 0 : (entry[1].vy + timeStep * forces.get(entry[0]).y)
+                    }]))});
 
             frameId = requestAnimationFrame(onFrame);
         }
