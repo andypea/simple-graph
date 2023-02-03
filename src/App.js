@@ -18,6 +18,24 @@ function App() {
   );
 }
 
+const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep) => {
+    const forces = new Map();
+    for (const entry of oldVerticesPositions.entries()) {
+        forces.set(entry[0], 
+            {
+                x: - Math.sign(entry[1].cx - width / 2) * Math.pow(entry[1].cx - width / 2, 2) - friction * entry[1].vx, 
+                y: - Math.sign(entry[1].cy - height / 2) * Math.pow(entry[1].cy - height / 2, 2) - friction * entry[1].vy
+            });
+    }
+
+    return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
+        ...entry[1],
+        cx: (entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx) % width,
+        cy: (entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy) % height,
+        vx: entry[1].frozen ? 0 : (entry[1].vx + timeStep * forces.get(entry[0]).x),
+        vy: entry[1].frozen ? 0 : (entry[1].vy + timeStep * forces.get(entry[0]).y)
+    }]))};
+
 function SimpleGraph(props) {
     // TODO: Update verticesPositions when props.vertices changes.
     // TODO: Copy all properties across when copying objects.
@@ -25,6 +43,8 @@ function SimpleGraph(props) {
     // TODO: Check is the dragging works correctly in Safari.
     // TODO: Vertices shouldn't need to pass their own ID to the move, freeze, unfreeze, etc. functions.
     // TODO: Extract the simulation data and code from the React component and make the functions more clearly pure.
+    // TODO: Add code to validate the passed in properties.
+    // TODO: Replace the graph edge / vertices specs with something more standard.
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
@@ -43,25 +63,7 @@ function SimpleGraph(props) {
         let frameId = null;
 
         function onFrame() {
-            setVerticesPositions(
-                (oldVerticesPositions) => {
-            
-                    const forces = new Map();
-                    for (const entry of oldVerticesPositions.entries()) {
-                        forces.set(entry[0], 
-                            {
-                                x: - Math.sign(entry[1].cx - props.width / 2) * Math.pow(entry[1].cx - props.width / 2, 2) - friction * entry[1].vx, 
-                                y: - Math.sign(entry[1].cy - props.width / 2) * Math.pow(entry[1].cy - props.width / 2, 2) - friction * entry[1].vy
-                            });
-                    }
-
-                    return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
-                        ...entry[1],
-                        cx: (entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx) % props.width,
-                        cy: (entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy) % props.height,
-                        vx: entry[1].frozen ? 0 : (entry[1].vx + timeStep * forces.get(entry[0]).x),
-                        vy: entry[1].frozen ? 0 : (entry[1].vy + timeStep * forces.get(entry[0]).y)
-                    }]))});
+            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep)); 
 
             frameId = requestAnimationFrame(onFrame);
         }
