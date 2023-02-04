@@ -93,6 +93,9 @@ function SimpleGraph(props) {
     // TODO: Extract the simulation data and code from the React component and make the functions more clearly pure.
     // TODO: Add code to validate the passed in properties.
     // TODO: Replace the graph edge / vertices specs with something more standard.
+    // TODO: Add a force that repels neighbouring vertices.
+    // TODO: Allow people to customise the vertex and edge appearance.
+    // TODO: Make into a WebComponent, usable outside React.
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
