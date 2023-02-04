@@ -4,21 +4,39 @@ import { useState, useEffect, useRef } from 'react';
 function App() {
   return (
     <div className="App">
-        <SimpleGraph width="500" 
-                     height="500" 
-                     vertices={[
-                         {id: "One"},
-                         {id: "Two"},
-                         {id: "Three"}]}
+        <SimpleGraph 
+            width="500" 
+            height="500" 
+            vertices={[
+                {id: "One"},
+                {id: "Two"},
+                {id: "Three"},
+                {id: "Four"},
+                {id: "Five"},
+                {id: "A"},
+                {id: "B"},
+                {id: "C"},
+            ]}
                      edges={[
-                         {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 100},
+                         {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 200},
+                         {id: "OneThree", vertexA: "One", vertexB: "Three", length: 200},
+                         {id: "OneFour", vertexA: "One", vertexB: "Four", length: 200},
+                         {id: "OneFive", vertexA: "One", vertexB: "Five", length: 200},
                          {id: "TwoThree", vertexA: "Two", vertexB: "Three", length: 200},
+                         {id: "TwoFour", vertexA: "Two", vertexB: "Four", length: 200},
+                         {id: "TwoFive", vertexA: "Two", vertexB: "Five", length: 200},
+                         {id: "ThreeFour", vertexA: "Three", vertexB: "Four", length: 200},
+                         {id: "ThreeFive", vertexA: "Three", vertexB: "Five", length: 200},
+                         {id: "FourFive", vertexA: "Four", vertexB: "Five", length: 200},
+                         {id: "AB", vertexA: "A", vertexB: "B", length: 100},
+                         {id: "AC", vertexA: "A", vertexB: "C", length: 100},
+                         {id: "BC", vertexA: "B", vertexB: "C", length: 100},
         ]}/>
     </div>
   );
 }
 
-const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges) => {
+const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges, springConstant) => {
     const forces = new Map([...oldVerticesPositions.entries()].map((entry) => [entry[0], {x: 0, y: 0}]));
 
     for (const k of oldVerticesPositions.keys()) {
@@ -36,8 +54,7 @@ const updateVerticesPositions = (oldVerticesPositions, width, height, friction, 
         const vertexB = oldVerticesPositions.get(e.vertexB);
 
         const distance = Math.sqrt(Math.pow(vertexB.cx - vertexA.cx, 2) + Math.pow(vertexB.cy - vertexA.cy, 2));
-        const k = 10;
-        const forceScalar = k * (distance - e.length);
+        const forceScalar = springConstant * (distance - e.length);
 
         const forceAToB = { 
             x: forceScalar * (vertexB.cx - vertexA.cx) / distance,
@@ -89,12 +106,13 @@ function SimpleGraph(props) {
 
     const timeStep = 0.005;
     const friction = 10;
+    const springConstant = 10;
     
     useEffect(() => {
         let frameId = null;
 
         function onFrame() {
-            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep, props.edges)); 
+            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep, props.edges, springConstant)); 
 
             frameId = requestAnimationFrame(onFrame);
         }
