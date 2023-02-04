@@ -11,22 +11,51 @@ function App() {
                          {id: "Two"},
                          {id: "Three"}]}
                      edges={[
-                         {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 1},
-                         {id: "TwoThree", vertexA: "Two", vertexB: "Three", length: 2},
+                         {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 100},
+                         {id: "TwoThree", vertexA: "Two", vertexB: "Three", length: 200},
         ]}/>
     </div>
   );
 }
 
-const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep) => {
-    const forces = new Map();
-    for (const entry of oldVerticesPositions.entries()) {
-        forces.set(entry[0], 
-            {
-                x: - Math.sign(entry[1].cx - width / 2) * Math.pow(entry[1].cx - width / 2, 2) - friction * entry[1].vx, 
-                y: - Math.sign(entry[1].cy - height / 2) * Math.pow(entry[1].cy - height / 2, 2) - friction * entry[1].vy
-            });
+const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges) => {
+    const forces = new Map([...oldVerticesPositions.entries()].map((entry) => [entry[0], {x: 0, y: 0}]));
+
+    for (const k of oldVerticesPositions.keys()) {
+        const vertex = oldVerticesPositions.get(k);
+        const oldForce = forces.get(k);
+
+        forces.set(k, {
+            x: oldForce.x - friction * vertex.vx,
+            y: oldForce.y - friction * vertex.vy
+        })
     }
+
+    for (const e of edges) {
+        const vertexA = oldVerticesPositions.get(e.vertexA);
+        const vertexB = oldVerticesPositions.get(e.vertexB);
+
+        const distance = Math.sqrt(Math.pow(vertexB.cx - vertexA.cx, 2) + Math.pow(vertexB.cy - vertexA.cy, 2));
+        const k = 10;
+        const forceScalar = k * (distance - e.length);
+
+        const forceAToB = { 
+            x: forceScalar * (vertexB.cx - vertexA.cx) / distance,
+            y: forceScalar * (vertexB.cy - vertexA.cy) / distance 
+        };
+
+        const forceA = forces.get(e.vertexA);
+        forceA.x = forceA.x + forceAToB.x;
+        forceA.y = forceA.y + forceAToB.y;
+
+        forces.set(vertexA.id, forceA)
+        
+        const forceB = forces.get(e.vertexB);
+        forceB.x = forceB.x - forceAToB.x;
+        forceB.y = forceB.y - forceAToB.y;
+
+        forces.set(vertexB.id, forceB)
+    };
 
     return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
         ...entry[1],
@@ -34,7 +63,9 @@ const updateVerticesPositions = (oldVerticesPositions, width, height, friction, 
         cy: (entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy) % height,
         vx: entry[1].frozen ? 0 : (entry[1].vx + timeStep * forces.get(entry[0]).x),
         vy: entry[1].frozen ? 0 : (entry[1].vy + timeStep * forces.get(entry[0]).y)
-    }]))};
+    }]))
+};
+
 
 function SimpleGraph(props) {
     // TODO: Update verticesPositions when props.vertices changes.
@@ -63,7 +94,7 @@ function SimpleGraph(props) {
         let frameId = null;
 
         function onFrame() {
-            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep)); 
+            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep, props.edges)); 
 
             frameId = requestAnimationFrame(onFrame);
         }
