@@ -97,6 +97,7 @@ function SimpleGraph(props) {
     // TODO: Allow people to customise the vertex and edge appearance.
     // TODO: Make into a WebComponent, usable outside React.
     // TODO: Stop people from dragging vertexes outside the SVG.
+    // TODO: Add an auto-linter.
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
@@ -182,9 +183,9 @@ function SimpleGraph(props) {
     );
 }
 
-const Vertex = (props) => {
-    // TODO: Does this work on Safari (I believe it has a bug in `getScreenCTM`.
-
+// TODO: Does this work on Safari (I believe it has a bug in `getScreenCTM`.
+const Vertex = (props) => 
+{
     const thisVertex = useRef(null);
     const [dragging, setDragging] = useState(false);
     const [offset, setOffset] = useState({x: 0, y: 0});
@@ -195,18 +196,18 @@ const Vertex = (props) => {
         setDragging(true);
         props.freezeVertex(props.id);
 
-        const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
+        //const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
         const pointerScreenPosition = new DOMPointReadOnly(event.pageX, event.pageY);
-        const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
-        setOffset({x: pointerLocalPosition.x - props.cx, y: pointerLocalPosition.y - props.cy});
+        //const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
+        setOffset({x: pointerScreenPosition.x - props.cx, y: pointerScreenPosition.y - props.cy});
     };
 
     const handleOnPointerMove = (event) => {
         if (dragging) {
-            const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
+            //const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
             const pointerScreenPosition = new DOMPointReadOnly(event.pageX, event.pageY);
-            const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
-            props.moveVertex(props.id, {x: pointerLocalPosition.x - offset.x, y: pointerLocalPosition.y - offset.y});
+            //const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
+            props.moveVertex(props.id, {x: pointerScreenPosition.x - offset.x, y: pointerScreenPosition.y - offset.y});
         }
     };
 
@@ -216,15 +217,19 @@ const Vertex = (props) => {
         thisVertex.current.releasePointerCapture(event.pointerId);
     };
 
-    return <circle id={props.id} 
-        cx={props.cx} 
-        cy={props.cy} 
-        r="20" 
-        onPointerDown={handleOnPointerDown} 
-        onPointerMove={handleOnPointerMove} 
-        onPointerUp={handleOnPointerUp} 
-        ref={thisVertex}
-    />
+    return (
+        <g 
+            ref={thisVertex} 
+            transform={`translate(${props.cx} ${props.cy})`}
+            onPointerDown={handleOnPointerDown} 
+            onPointerMove={handleOnPointerMove} 
+            onPointerUp={handleOnPointerUp} 
+        >
+            <circle
+                r="20" 
+            />
+        </g>
+    );
 }
 
 const Edge = (props) => {
@@ -237,6 +242,14 @@ const Edge = (props) => {
             y2={props.positionB.cy} 
             stroke="black"
         />
+    );
+}
+
+const Star = ({cx = 0, cy = 0, innerRadius = 5, outerRadius = 10, numPoints = 5}) => {
+    return (
+        <g>
+            <circle cx={cx} cy={cy} r={innerRadius} />
+        </g>
     );
 }
 
