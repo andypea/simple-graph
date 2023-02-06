@@ -2,38 +2,38 @@ import './App.css';
 import { useState, useEffect, useRef } from 'react';
 
 function App() {
-  return (
-    <div className="App">
-        <SimpleGraph 
-            width="500" 
-            height="500" 
-            vertices={[
-                {id: "One"},
-                {id: "Two"},
-                {id: "Three"},
-                {id: "Four"},
-                {id: "Five"},
-                {id: "A"},
-                {id: "B"},
-                {id: "C"},
-            ]}
-                     edges={[
-                         {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 200},
-                         {id: "OneThree", vertexA: "One", vertexB: "Three", length: 200},
-                         {id: "OneFour", vertexA: "One", vertexB: "Four", length: 200},
-                         {id: "OneFive", vertexA: "One", vertexB: "Five", length: 200},
-                         {id: "TwoThree", vertexA: "Two", vertexB: "Three", length: 200},
-                         {id: "TwoFour", vertexA: "Two", vertexB: "Four", length: 200},
-                         {id: "TwoFive", vertexA: "Two", vertexB: "Five", length: 200},
-                         {id: "ThreeFour", vertexA: "Three", vertexB: "Four", length: 200},
-                         {id: "ThreeFive", vertexA: "Three", vertexB: "Five", length: 200},
-                         {id: "FourFive", vertexA: "Four", vertexB: "Five", length: 200},
-                         {id: "AB", vertexA: "A", vertexB: "B", length: 100},
-                         {id: "AC", vertexA: "A", vertexB: "C", length: 100},
-                         {id: "BC", vertexA: "B", vertexB: "C", length: 100},
-        ]}/>
-    </div>
-  );
+    return (
+        <div className="App">
+            <SimpleGraph 
+                width="500" 
+                height="500" 
+                vertices={[
+                    {id: "One"},
+                    {id: "Two"},
+                    {id: "Three"},
+                    {id: "Four"},
+                    {id: "Five"},
+                    {id: "A"},
+                    {id: "B"},
+                    {id: "C"},
+                ]}
+                edges={[
+                    {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 200},
+                    {id: "OneThree", vertexA: "One", vertexB: "Three", length: 200},
+                    {id: "OneFour", vertexA: "One", vertexB: "Four", length: 200},
+                    {id: "OneFive", vertexA: "One", vertexB: "Five", length: 200},
+                    {id: "TwoThree", vertexA: "Two", vertexB: "Three", length: 200},
+                    {id: "TwoFour", vertexA: "Two", vertexB: "Four", length: 200},
+                    {id: "TwoFive", vertexA: "Two", vertexB: "Five", length: 200},
+                    {id: "ThreeFour", vertexA: "Three", vertexB: "Four", length: 200},
+                    {id: "ThreeFive", vertexA: "Three", vertexB: "Five", length: 200},
+                    {id: "FourFive", vertexA: "Four", vertexB: "Five", length: 200},
+                    {id: "AB", vertexA: "A", vertexB: "B", length: 100},
+                    {id: "AC", vertexA: "A", vertexB: "C", length: 100},
+                    {id: "BC", vertexA: "B", vertexB: "C", length: 100},
+                ]}/>
+        </div>
+    );
 }
 
 const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges, springConstant) => {
@@ -66,7 +66,7 @@ const updateVerticesPositions = (oldVerticesPositions, width, height, friction, 
         forceA.y = forceA.y + forceAToB.y;
 
         forces.set(vertexA.id, forceA)
-        
+
         const forceB = forces.get(e.vertexB);
         forceB.x = forceB.x - forceAToB.x;
         forceB.y = forceB.y - forceAToB.y;
@@ -96,6 +96,7 @@ function SimpleGraph(props) {
     // TODO: Add a force that repels neighbouring vertices.
     // TODO: Allow people to customise the vertex and edge appearance.
     // TODO: Make into a WebComponent, usable outside React.
+    // TODO: Stop people from dragging vertexes outside the SVG.
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
@@ -110,7 +111,7 @@ function SimpleGraph(props) {
     const timeStep = 0.005;
     const friction = 10;
     const springConstant = 10;
-    
+
     useEffect(() => {
         let frameId = null;
 
@@ -134,15 +135,15 @@ function SimpleGraph(props) {
     }, [props.width, props.height]);
 
     const moveVertex = (id, position) => {
-            setVerticesPositions((oldVerticesPositions) => new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), cx: position.x, cy: position.y}))
+        setVerticesPositions((oldVerticesPositions) => new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), cx: position.x, cy: position.y}))
     };
 
     const freezeVertex = (id) => {
-            setVerticesPositions((oldVerticesPositions) => new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), frozen: true}))
+        setVerticesPositions((oldVerticesPositions) => new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), frozen: true}))
     };
-    
+
     const unfreezeVertex = (id) => {
-            setVerticesPositions((oldVerticesPositions) =>  new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), frozen: false}))
+        setVerticesPositions((oldVerticesPositions) =>  new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), frozen: false}))
     };
 
     return (
@@ -160,7 +161,7 @@ function SimpleGraph(props) {
                                     positionB={verticesPositions.get(e.vertexB)}
                                 />
                             )
-                    }) 
+                        }) 
                     }
                 </g>
                 <g>
@@ -173,7 +174,7 @@ function SimpleGraph(props) {
                             moveVertex={moveVertex} 
                             freezeVertex={freezeVertex}
                             unfreezeVertex={unfreezeVertex}
-                            />)
+                        />)
                     }
                 </g>
             </g>
@@ -190,16 +191,16 @@ const Vertex = (props) => {
 
     const handleOnPointerDown = (event) => {
         thisVertex.current.setPointerCapture(event.pointerId);
-        
+
         setDragging(true);
         props.freezeVertex(props.id);
-            
+
         const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
         const pointerScreenPosition = new DOMPointReadOnly(event.pageX, event.pageY);
         const pointerLocalPosition = pointerScreenPosition.matrixTransform(screenToLocalTransformationMatrix.inverse());
         setOffset({x: pointerLocalPosition.x - props.cx, y: pointerLocalPosition.y - props.cy});
     };
-    
+
     const handleOnPointerMove = (event) => {
         if (dragging) {
             const screenToLocalTransformationMatrix = thisVertex.current.getScreenCTM();
@@ -208,7 +209,7 @@ const Vertex = (props) => {
             props.moveVertex(props.id, {x: pointerLocalPosition.x - offset.x, y: pointerLocalPosition.y - offset.y});
         }
     };
-    
+
     const handleOnPointerUp = (event) => {
         setDragging(false);
         props.unfreezeVertex(props.id);
@@ -216,14 +217,14 @@ const Vertex = (props) => {
     };
 
     return <circle id={props.id} 
-                   cx={props.cx} 
-                   cy={props.cy} 
-                   r="20" 
-                   onPointerDown={handleOnPointerDown} 
-                   onPointerMove={handleOnPointerMove} 
-                   onPointerUp={handleOnPointerUp} 
-                   ref={thisVertex}
-                   />
+        cx={props.cx} 
+        cy={props.cy} 
+        r="20" 
+        onPointerDown={handleOnPointerDown} 
+        onPointerMove={handleOnPointerMove} 
+        onPointerUp={handleOnPointerUp} 
+        ref={thisVertex}
+    />
 }
 
 const Edge = (props) => {
