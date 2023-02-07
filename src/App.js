@@ -225,9 +225,7 @@ const Vertex = (props) =>
             onPointerMove={handleOnPointerMove} 
             onPointerUp={handleOnPointerUp} 
         >
-            <circle
-                r="20" 
-            />
+            <Star innerRadius="5" />
         </g>
     );
 }
@@ -245,10 +243,30 @@ const Edge = (props) => {
     );
 }
 
-const Star = ({cx = 0, cy = 0, innerRadius = 5, outerRadius = 10, numPoints = 5}) => {
+const Star = ({outerRadius = 10, innerRadiusRatio = 0.5, numPoints = 5}) => {
+    const theta = Math.PI / numPoints;
+    const angularPoints = Array.from(Array(2 * numPoints), (_, i) => ({
+        angle: i * theta, 
+        r: ((i % 2) === 0) ? outerRadius : (innerRadiusRatio * outerRadius)
+    }))
+
+    const cartesianPoints = angularPoints.map(({angle, r}) => ({
+        x: r * Math.cos(angle), 
+        y: r * Math.sin(angle) 
+    }))
+
+    const pathHeadString = `M ${cartesianPoints[0].x}, ${cartesianPoints[0].y}`;
+    const pathMiddleString = cartesianPoints.slice(1, cartesianPoints.length).map(({x, y}) => `L ${x}, ${y}`).join(" ");
+    const pathTailString = "Z";
+
+    const pathString = "".concat(pathHeadString, " ", pathMiddleString, " ", pathTailString); 
+                        
+
     return (
         <g>
-            <circle cx={cx} cy={cy} r={innerRadius} />
+            <path d={pathString} 
+            fill="yellow"
+            stroke="black" />
         </g>
     );
 }
