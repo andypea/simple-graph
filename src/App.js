@@ -76,8 +76,8 @@ const updateVerticesPositions = (oldVerticesPositions, width, height, friction, 
 
     return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
         ...entry[1],
-        cx: (entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx) % width,
-        cy: (entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy) % height,
+        cx: clamp(entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx, 0, width),
+        cy: clamp(entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy, 0, height),
         vx: entry[1].frozen ? 0 : (entry[1].vx + timeStep * forces.get(entry[0]).x),
         vy: entry[1].frozen ? 0 : (entry[1].vy + timeStep * forces.get(entry[0]).y)
     }]))
@@ -100,6 +100,7 @@ function SimpleGraph(props) {
     // TODO: Add an auto-linter.
     // TODO: Stop vertices being dragged off the edge.
     // TODO: Stop vertices being wrapped around by the numerical algorithm
+    // TODO: Add Aria attributes.
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
@@ -228,6 +229,20 @@ const Vertex = (props) =>
             onPointerUp={handleOnPointerUp} 
         >
             <Star innerRadius="5" />
+            <text dominantBaseline="middle" 
+                  textAnchor="middle" 
+                  y="20"
+                  stroke="lightgrey"
+                  strokeWidth="5"
+                  style={{userSelect: "none"}}>
+                Hello
+            </text>
+            <text dominantBaseline="middle" 
+                  textAnchor="middle" 
+                  y="20"
+                  style={{userSelect: "none"}}>
+                Hello
+            </text>
         </g>
     );
 }
@@ -240,7 +255,7 @@ const Edge = (props) => {
             y1={props.positionA.cy} 
             x2={props.positionB.cx} 
             y2={props.positionB.cy} 
-            stroke="black"
+            stroke="grey"
         />
     );
 }
@@ -272,6 +287,8 @@ const Star = ({outerRadius = 10, innerRadiusRatio = 0.5, numPoints = 5}) => {
         </g>
     );
 }
+
+const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 export default App;
 
