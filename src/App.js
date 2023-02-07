@@ -98,6 +98,8 @@ function SimpleGraph(props) {
     // TODO: Make into a WebComponent, usable outside React.
     // TODO: Stop people from dragging vertexes outside the SVG.
     // TODO: Add an auto-linter.
+    // TODO: Stop vertices being dragged off the edge.
+    // TODO: Stop vertices being wrapped around by the numerical algorithm
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
@@ -133,7 +135,7 @@ function SimpleGraph(props) {
 
         start();
         return () => stop();
-    }, [props.width, props.height]);
+    }, [props.width, props.height, props.edges]);
 
     const moveVertex = (id, position) => {
         setVerticesPositions((oldVerticesPositions) => new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), cx: position.x, cy: position.y}))
