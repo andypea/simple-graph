@@ -8,14 +8,14 @@ function App() {
                 width="500" 
                 height="500" 
                 vertices={[
-                    {id: "One"},
-                    {id: "Two"},
-                    {id: "Three"},
-                    {id: "Four"},
-                    {id: "Five"},
-                    {id: "A"},
-                    {id: "B"},
-                    {id: "C"},
+                    {id: "One", fill: "red"},
+                    {id: "Two", fill: "orange"},
+                    {id: "Three", fill: "yellow"},
+                    {id: "Four", fill: "green"},
+                    {id: "Five", fill: "blue"},
+                    {id: "A", fill: "indigo"},
+                    {id: "B", fill: "violet"},
+                    {id: "C", fill: "black"},
                 ]}
                 edges={[
                     {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 200},
@@ -109,7 +109,9 @@ function SimpleGraph(props) {
             cy: Math.random() * props.height,
             vx: 0,
             vy: 0,
-            frozen: false 
+            frozen: false,
+            fill: v.fill,
+            label: v.id
         }]))));
 
     const timeStep = 0.005;
@@ -152,7 +154,7 @@ function SimpleGraph(props) {
 
     return (
         <svg width={props.width} height={props.height}>
-            <rect x="0" y="0" width={props.width} height={props.height} fill="lightgrey" />
+            <rect x="0" y="0" width={props.width} height={props.height} fill="none" stroke="black" />
             <g>
                 <g>
                     {
@@ -178,6 +180,8 @@ function SimpleGraph(props) {
                             moveVertex={moveVertex} 
                             freezeVertex={freezeVertex}
                             unfreezeVertex={unfreezeVertex}
+                            fill={v.fill}
+                            label={v.label}
                         />)
                     }
                 </g>
@@ -228,20 +232,23 @@ const Vertex = (props) =>
             onPointerMove={handleOnPointerMove} 
             onPointerUp={handleOnPointerUp} 
         >
-            <Star innerRadius="5" />
+            <Star 
+                outerRadius="10" 
+                fill={props.fill}
+            />
             <text dominantBaseline="middle" 
                   textAnchor="middle" 
                   y="20"
-                  stroke="lightgrey"
+                  stroke="white"
                   strokeWidth="5"
                   style={{userSelect: "none"}}>
-                Hello
+                {props.label}
             </text>
             <text dominantBaseline="middle" 
                   textAnchor="middle" 
                   y="20"
                   style={{userSelect: "none"}}>
-                Hello
+                {props.label}
             </text>
         </g>
     );
@@ -260,7 +267,7 @@ const Edge = (props) => {
     );
 }
 
-const Star = ({outerRadius = 10, innerRadiusRatio = 0.5, numPoints = 5}) => {
+const Star = ({outerRadius = 10, innerRadiusRatio = 0.5, numPoints = 5, fill="yellow"}) => {
     const theta = Math.PI / numPoints;
     const angularPoints = Array.from(Array(2 * numPoints), (_, i) => ({
         angle: i * theta, 
@@ -282,7 +289,7 @@ const Star = ({outerRadius = 10, innerRadiusRatio = 0.5, numPoints = 5}) => {
     return (
         <g>
             <path d={pathString} 
-            fill="yellow"
+            fill={fill}
             stroke="black" />
         </g>
     );
