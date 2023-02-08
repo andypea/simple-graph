@@ -85,30 +85,6 @@ const updateVerticesPositions = (oldVerticesPositions, width, height, friction, 
 
 
 function SimpleGraph(props) {
-    // TODO: Update verticesPositions when props.vertices changes.
-    // TODO: Copy all properties across when copying objects.
-    // TODO: Bug: if SimpleGraph width or height is specified as a percentage.
-    // TODO: Check is the dragging works correctly in Safari.
-    // TODO: Vertices shouldn't need to pass their own ID to the move, freeze, unfreeze, etc. functions.
-    // TODO: Extract the simulation data and code from the React component and make the functions more clearly pure.
-    // TODO: Add code to validate the passed in properties.
-    // TODO: Replace the graph edge / vertices specs with something more standard.
-    // TODO: Add a force that repels neighbouring vertices.
-    // TODO: Allow people to customise the vertex and edge appearance.
-    // TODO: Make into a WebComponent, usable outside React.
-    // TODO: Stop people from dragging vertexes outside the SVG.
-    // TODO: Add an auto-linter.
-    // TODO: Stop vertices being dragged off the edge.
-    // TODO: Stop vertices being wrapped around by the numerical algorithm
-    // TODO: Add Aria attributes.
-    // TODO: Allow people to set the background (and text background) colour.
-    // TODO: Add edge labels
-    // TODO: When doing updates, iterate through props.vertices, not the verticesPositions
-    // TODO: Update the Readme.md
-    // TODO: Turn it into a component or component library
-    // TODO: Publish to NPM
-    // TODO: Turn all the TODOs into GitHub issues
-
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
         {
@@ -169,7 +145,6 @@ function SimpleGraph(props) {
                             return (
                                 <Edge 
                                     key={e.id} 
-                                    // TODO: Don't pass the whole object here.
                                     positionA={verticesPositions.get(e.vertexA)} 
                                     positionB={verticesPositions.get(e.vertexB)}
                                 />
@@ -197,7 +172,6 @@ function SimpleGraph(props) {
     );
 }
 
-// TODO: Does this work on Safari (I believe it has a bug in `getScreenCTM`.
 const Vertex = (props) => 
 {
     const thisVertex = useRef(null);
@@ -262,7 +236,6 @@ const Vertex = (props) =>
 }
 
 const Edge = (props) => {
-    // TODO: Refactor so that these positions are just `x` and `y`, not `cx` and `cy`.
     return (
         <line 
             x1={props.positionA.cx} 
