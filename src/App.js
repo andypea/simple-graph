@@ -104,6 +104,10 @@ function SimpleGraph(props) {
     // TODO: Allow people to set the background (and text background) colour.
     // TODO: Add edge labels
     // TODO: When doing updates, iterate through props.vertices, not the verticesPositions
+    // TODO: Update the Readme.md
+    // TODO: Turn it into a component or component library
+    // TODO: Publish to NPM
+    // TODO: Turn all the TODOs into GitHub issues
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
