@@ -101,6 +101,9 @@ function SimpleGraph(props) {
     // TODO: Stop vertices being dragged off the edge.
     // TODO: Stop vertices being wrapped around by the numerical algorithm
     // TODO: Add Aria attributes.
+    // TODO: Allow people to set the background (and text background) colour.
+    // TODO: Add edge labels
+    // TODO: When doing updates, iterate through props.vertices, not the verticesPositions
 
     const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
         v.id, 
