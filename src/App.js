@@ -4,20 +4,23 @@ import { useState, useEffect, useRef } from 'react';
 function App() {
     return (
         <div className="App">
-            <SimpleGraph 
-                width="500" 
-                height="500" 
-                vertices={[
-                    {id: "One", fill: "red", label: "One"},
-                    {id: "Two", fill: "orange", label: "Two"},
+            <TestApp />
+        </div>
+    );
+}
+
+const TestApp = () => {
+    const [vertices, setVertices] = useState([
+                    {id: "One", fill: "red", label: "Foo"},
+                    {id: "Two", fill: "orange", label: "Bar"},
                     {id: "Three", fill: "yellow", label: "Three"},
                     {id: "Four", fill: "green", label: "Four"},
                     {id: "Five", fill: "blue", label: "Five"},
                     {id: "A", fill: "indigo", label: "A"},
                     {id: "B", fill: "violet", label: "B"},
-                    {id: "C", fill: "black", label: "C"},
-                ]}
-                edges={[
+                    {id: "C", fill: "black", label: "C"}]);
+
+    const [edges, setEdges] = useState([
                     {id: "OneTwo", source: "One", target: "Two", length: 200},
                     {id: "OneThree", source: "One", target: "Three", length: 200},
                     {id: "OneFour", source: "One", target: "Four", length: 200},
@@ -31,10 +34,42 @@ function App() {
                     {id: "AB", source: "A", target: "B", length: 100},
                     {id: "AC", source: "A", target: "C", length: 100},
                     {id: "BC", source: "B", target: "C", length: 100},
-                ]}/>
+                ]);
+
+    const [verticesText, setVerticesText] = useState(JSON.stringify(vertices));
+    const [edgesText, setEdgesText] = useState(JSON.stringify(edges));
+
+    const handleSubmit = (event) => {
+        setEdges(JSON.parse(edgesText));
+        event.preventDefault();
+    };
+
+    return (
+        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            <SimpleGraph 
+                width="500" 
+                height="500" 
+                vertices={vertices}
+                edges={edges}
+            />
+            <form onSubmit={handleSubmit}>
+                <textarea 
+                    defaultValue={verticesText} 
+                    style={{width: "50em", height: "10em"}} 
+                    onChange={(event) => setVerticesText(event.target.value)}
+                />
+                <textarea 
+                    defaultValue={edgesText} 
+                    style={{width: "50em", height: "10em"}} 
+                    onChange={(event) => setVerticesText(event.target.value)}
+                />
+                <button type="submit" value="Update">
+                    Update
+                </button>
+            </form>
         </div>
     );
-}
+};
 
 const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges, springConstant) => {
     const forces = new Map([...oldVerticesPositions.entries()].map((entry) => [entry[0], {x: 0, y: 0}]));
