@@ -8,29 +8,29 @@ function App() {
                 width="500" 
                 height="500" 
                 vertices={[
-                    {id: "One", fill: "red"},
-                    {id: "Two", fill: "orange"},
-                    {id: "Three", fill: "yellow"},
-                    {id: "Four", fill: "green"},
-                    {id: "Five", fill: "blue"},
-                    {id: "A", fill: "indigo"},
-                    {id: "B", fill: "violet"},
-                    {id: "C", fill: "black"},
+                    {id: "One", fill: "red", label: "One"},
+                    {id: "Two", fill: "orange", label: "Two"},
+                    {id: "Three", fill: "yellow", label: "Three"},
+                    {id: "Four", fill: "green", label: "Four"},
+                    {id: "Five", fill: "blue", label: "Five"},
+                    {id: "A", fill: "indigo", label: "A"},
+                    {id: "B", fill: "violet", label: "B"},
+                    {id: "C", fill: "black", label: "C"},
                 ]}
                 edges={[
-                    {id: "OneTwo", vertexA: "One", vertexB: "Two", length: 200},
-                    {id: "OneThree", vertexA: "One", vertexB: "Three", length: 200},
-                    {id: "OneFour", vertexA: "One", vertexB: "Four", length: 200},
-                    {id: "OneFive", vertexA: "One", vertexB: "Five", length: 200},
-                    {id: "TwoThree", vertexA: "Two", vertexB: "Three", length: 200},
-                    {id: "TwoFour", vertexA: "Two", vertexB: "Four", length: 200},
-                    {id: "TwoFive", vertexA: "Two", vertexB: "Five", length: 200},
-                    {id: "ThreeFour", vertexA: "Three", vertexB: "Four", length: 200},
-                    {id: "ThreeFive", vertexA: "Three", vertexB: "Five", length: 200},
-                    {id: "FourFive", vertexA: "Four", vertexB: "Five", length: 200},
-                    {id: "AB", vertexA: "A", vertexB: "B", length: 100},
-                    {id: "AC", vertexA: "A", vertexB: "C", length: 100},
-                    {id: "BC", vertexA: "B", vertexB: "C", length: 100},
+                    {id: "OneTwo", source: "One", target: "Two", length: 200},
+                    {id: "OneThree", source: "One", target: "Three", length: 200},
+                    {id: "OneFour", source: "One", target: "Four", length: 200},
+                    {id: "OneFive", source: "One", target: "Five", length: 200},
+                    {id: "TwoThree", source: "Two", target: "Three", length: 200},
+                    {id: "TwoFour", source: "Two", target: "Four", length: 200},
+                    {id: "TwoFive", source: "Two", target: "Five", length: 200},
+                    {id: "ThreeFour", source: "Three", target: "Four", length: 200},
+                    {id: "ThreeFive", source: "Three", target: "Five", length: 200},
+                    {id: "FourFive", source: "Four", target: "Five", length: 200},
+                    {id: "AB", source: "A", target: "B", length: 100},
+                    {id: "AC", source: "A", target: "C", length: 100},
+                    {id: "BC", source: "B", target: "C", length: 100},
                 ]}/>
         </div>
     );
@@ -50,28 +50,28 @@ const updateVerticesPositions = (oldVerticesPositions, width, height, friction, 
     }
 
     for (const e of edges) {
-        const vertexA = oldVerticesPositions.get(e.vertexA);
-        const vertexB = oldVerticesPositions.get(e.vertexB);
+        const source = oldVerticesPositions.get(e.source);
+        const target = oldVerticesPositions.get(e.target);
 
-        const distance = Math.sqrt(Math.pow(vertexB.cx - vertexA.cx, 2) + Math.pow(vertexB.cy - vertexA.cy, 2));
+        const distance = Math.sqrt(Math.pow(target.cx - source.cx, 2) + Math.pow(target.cy - source.cy, 2));
         const forceScalar = springConstant * (distance - e.length);
 
         const forceAToB = { 
-            x: forceScalar * (vertexB.cx - vertexA.cx) / distance,
-            y: forceScalar * (vertexB.cy - vertexA.cy) / distance 
+            x: forceScalar * (target.cx - source.cx) / distance,
+            y: forceScalar * (target.cy - source.cy) / distance 
         };
 
-        const forceA = forces.get(e.vertexA);
+        const forceA = forces.get(e.source);
         forceA.x = forceA.x + forceAToB.x;
         forceA.y = forceA.y + forceAToB.y;
 
-        forces.set(vertexA.id, forceA)
+        forces.set(source.id, forceA)
 
-        const forceB = forces.get(e.vertexB);
+        const forceB = forces.get(e.target);
         forceB.x = forceB.x - forceAToB.x;
         forceB.y = forceB.y - forceAToB.y;
 
-        forces.set(vertexB.id, forceB)
+        forces.set(target.id, forceB)
     };
 
     return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
@@ -94,7 +94,7 @@ function SimpleGraph(props) {
             vy: 0,
             frozen: false,
             fill: v.fill,
-            label: v.id
+            label: v.label
         }]))));
 
     const timeStep = 0.005;
@@ -145,8 +145,8 @@ function SimpleGraph(props) {
                             return (
                                 <Edge 
                                     key={e.id} 
-                                    positionA={verticesPositions.get(e.vertexA)} 
-                                    positionB={verticesPositions.get(e.vertexB)}
+                                    positionA={verticesPositions.get(e.source)} 
+                                    positionB={verticesPositions.get(e.target)}
                                 />
                             )
                         }) 
