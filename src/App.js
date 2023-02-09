@@ -41,6 +41,8 @@ const TestApp = () => {
 
     const handleSubmit = (event) => {
         setEdges(JSON.parse(edgesText));
+        setVertices(JSON.parse(verticesText));
+        console.log(vertices);
         event.preventDefault();
     };
 
