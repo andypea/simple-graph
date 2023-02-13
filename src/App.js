@@ -42,7 +42,6 @@ const TestApp = () => {
     const handleSubmit = (event) => {
         setEdges(JSON.parse(edgesText));
         setVertices(JSON.parse(verticesText));
-        console.log(vertices);
         event.preventDefault();
     };
 
@@ -63,7 +62,7 @@ const TestApp = () => {
                 <textarea 
                     defaultValue={edgesText} 
                     style={{width: "50em", height: "10em"}} 
-                    onChange={(event) => setVerticesText(event.target.value)}
+                    onChange={(event) => setEdgesText(event.target.value)}
                 />
                 <button type="submit" value="Update">
                     Update
@@ -73,66 +72,89 @@ const TestApp = () => {
     );
 };
 
-const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges, springConstant) => {
-    const forces = new Map([...oldVerticesPositions.entries()].map((entry) => [entry[0], {x: 0, y: 0}]));
+const reconcileVertexPositions = (vertices, oldVerticesPositions, width, height)  => {
+    const newVerticesPositions = new Map();
 
-    for (const k of oldVerticesPositions.keys()) {
-        const vertex = oldVerticesPositions.get(k);
-        const oldForce = forces.get(k);
+    for (const vertex of vertices) {
+        if (oldVerticesPositions.has(vertex.id)) {
+            newVerticesPositions.set(vertex.id, oldVerticesPositions.get(vertex.id));
+        } else {
+            newVerticesPositions.set(vertex.id, {
+                cx: Math.random() * width, 
+                cy: Math.random() * height, 
+                vx: 0, 
+                vy: 0, 
+                frozen: false});
+        }
+    }
 
-        forces.set(k, {
-            x: oldForce.x - friction * vertex.vx,
-            y: oldForce.y - friction * vertex.vy
+    return newVerticesPositions;
+}
+
+const updateVerticesPositions = (oldVerticesPositions, width, height, friction, timeStep, edges, springConstant, vertices) => {
+    // First create a new Map containing all the vertices listed.
+    const newVerticesPositions = reconcileVertexPositions(vertices, oldVerticesPositions, width, height);
+
+    const forces = new Map(vertices.map((vertex) => [vertex.id, {x: 0, y: 0}]));
+
+    for (const vertex of vertices) {
+        const vertexPosition = newVerticesPositions.get(vertex.id);
+        const force = forces.get(vertex.id); 
+
+        forces.set(vertex.id, {
+            x: force.x - friction * vertexPosition.vx,
+            y: force.y - friction * vertexPosition.vy
         })
     }
 
     for (const e of edges) {
-        const source = oldVerticesPositions.get(e.source);
-        const target = oldVerticesPositions.get(e.target);
+        if ((! newVerticesPositions.has(e.source)) || (! newVerticesPositions.has(e.target))) {
+            continue;
+        }
+
+        // TODO: Check both vertices exist!
+        const source = newVerticesPositions.get(e.source);
+        const target = newVerticesPositions.get(e.target);
 
         const distance = Math.sqrt(Math.pow(target.cx - source.cx, 2) + Math.pow(target.cy - source.cy, 2));
         const forceScalar = springConstant * (distance - e.length);
 
-        const forceAToB = { 
+        const forceSourceToTarget = { 
             x: forceScalar * (target.cx - source.cx) / distance,
             y: forceScalar * (target.cy - source.cy) / distance 
         };
 
-        const forceA = forces.get(e.source);
-        forceA.x = forceA.x + forceAToB.x;
-        forceA.y = forceA.y + forceAToB.y;
+        const forceSource = forces.get(e.source);
+        forces.set(e.source, {
+            x: forceSource.x + forceSourceToTarget.x, 
+            y: forceSource.y + forceSourceToTarget.y
+        });
 
-        forces.set(source.id, forceA)
+        const forceTarget = forces.get(e.target);
+        forces.set(e.target, {
+            x: forceTarget.x - forceSourceToTarget.x, 
+            y: forceTarget.y - forceSourceToTarget.y
+        });
 
-        const forceB = forces.get(e.target);
-        forceB.x = forceB.x - forceAToB.x;
-        forceB.y = forceB.y - forceAToB.y;
-
-        forces.set(target.id, forceB)
     };
 
-    return new Map([...oldVerticesPositions.entries()].map(entry => [entry[0], {
-        ...entry[1],
-        cx: clamp(entry[1].cx + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vx, 0, width),
-        cy: clamp(entry[1].cy + (entry[1].frozen ? 0 : 1) * timeStep * entry[1].vy, 0, height),
-        vx: entry[1].frozen ? 0 : (entry[1].vx + timeStep * forces.get(entry[0]).x),
-        vy: entry[1].frozen ? 0 : (entry[1].vy + timeStep * forces.get(entry[0]).y)
-    }]))
+    for (const vertex of vertices) {
+        const oldPosition = newVerticesPositions.get(vertex.id);
+        newVerticesPositions.set(vertex.id, {
+            cx: clamp(oldPosition.cx + (oldPosition.frozen ? 0 : 1) * timeStep * oldPosition.vx, 0, width),
+            cy: clamp(oldPosition.cy + (oldPosition.frozen ? 0 : 1) * timeStep * oldPosition.vy, 0, height),
+            vx: oldPosition.frozen ? 0 : (oldPosition.vx + timeStep * forces.get(vertex.id).x),
+            vy: oldPosition.frozen ? 0 : (oldPosition.vy + timeStep * forces.get(vertex.id).y),
+            frozen: oldPosition.frozen
+        });
+    }
+
+    return newVerticesPositions;
 };
 
 
 function SimpleGraph(props) {
-    const [verticesPositions, setVerticesPositions] = useState(new Map(props.vertices.map((v) => ([
-        v.id, 
-        {
-            cx: Math.random() * props.width, 
-            cy: Math.random() * props.height,
-            vx: 0,
-            vy: 0,
-            frozen: false,
-            fill: v.fill,
-            label: v.label
-        }]))));
+    const [verticesPositions, setVerticesPositions] = useState(new Map());
 
     const timeStep = 0.005;
     const friction = 10;
@@ -142,7 +164,7 @@ function SimpleGraph(props) {
         let frameId = null;
 
         function onFrame() {
-            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep, props.edges, springConstant)); 
+            setVerticesPositions((oldVerticesPositions) => updateVerticesPositions(oldVerticesPositions, props.width, props.height, friction, timeStep, props.edges, springConstant, props.vertices)); 
 
             frameId = requestAnimationFrame(onFrame);
         }
@@ -158,7 +180,7 @@ function SimpleGraph(props) {
 
         start();
         return () => stop();
-    }, [props.width, props.height, props.edges]);
+    }, [props.width, props.height, props.edges, props.vertices]);
 
     const moveVertex = (id, position) => {
         setVerticesPositions((oldVerticesPositions) => new Map(oldVerticesPositions.entries()).set(id, {...oldVerticesPositions.get(id), cx: position.x, cy: position.y}))
@@ -178,12 +200,12 @@ function SimpleGraph(props) {
             <g>
                 <g>
                     {
-                        props.edges.map(e => {
+                        props.edges.filter((e) => verticesPositions.has(e.source) && verticesPositions.has(e.target)).map(e => {
                             return (
                                 <Edge 
                                     key={e.id} 
-                                    positionA={verticesPositions.get(e.source)} 
-                                    positionB={verticesPositions.get(e.target)}
+                                    source={verticesPositions.get(e.source)} 
+                                    target={verticesPositions.get(e.target)}
                                 />
                             )
                         }) 
@@ -191,17 +213,21 @@ function SimpleGraph(props) {
                 </g>
                 <g>
                     {
-                        [...verticesPositions.entries()].map(([id, v]) => <Vertex 
-                            key={id} 
-                            id={id} 
-                            cx={v.cx} 
-                            cy={v.cy} 
-                            moveVertex={moveVertex} 
-                            freezeVertex={freezeVertex}
-                            unfreezeVertex={unfreezeVertex}
-                            fill={v.fill}
-                            label={v.label}
-                        />)
+                        props.vertices.filter((v) => verticesPositions.has(v.id)).map((v) => {
+                            const position = verticesPositions.get(v.id);
+                            return <Vertex 
+                                key={v.id} 
+                                id={v.id} 
+                                cx={position.cx} 
+                                cy={position.cy} 
+                                moveVertex={moveVertex} 
+                                freezeVertex={freezeVertex}
+                                unfreezeVertex={unfreezeVertex}
+                                fill={v.fill}
+                                label={v.label}
+
+                            />
+                        })
                     }
                 </g>
             </g>
@@ -275,10 +301,10 @@ const Vertex = (props) =>
 const Edge = (props) => {
     return (
         <line 
-            x1={props.positionA.cx} 
-            y1={props.positionA.cy} 
-            x2={props.positionB.cx} 
-            y2={props.positionB.cy} 
+            x1={props.source.cx} 
+            y1={props.source.cy} 
+            x2={props.target.cx} 
+            y2={props.target.cy} 
             stroke="grey"
         />
     );
