@@ -56,7 +56,7 @@ const TestApp = () => {
             <form onSubmit={handleSubmit}>
                 <textarea 
                     defaultValue={verticesText} 
-                    style={{width: "50em", height: "10em"}} 
+                    style={{width: "40em", height: "10em"}} 
                     onChange={(event) => setVerticesText(event.target.value)}
                 />
                 <textarea 
