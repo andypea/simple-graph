@@ -56,6 +56,7 @@ const TestApp = () => {
                 height="500" 
                 vertices={vertices}
                 edges={edges}
+                render={(fill, label) => <VertexDisplay fill={fill} label={label} />}
             />
             <form onSubmit={handleSubmit}>
                 <textarea 
@@ -229,7 +230,7 @@ function SimpleGraph(props) {
                                 unfreezeVertex={unfreezeVertex}
                                 fill={v.fill}
                                 label={v.label}
-
+                                render={props.render}
                             />
                         })
                     }
@@ -273,13 +274,19 @@ const Vertex = (props) =>
     };
 
     return (
-        <g 
-            ref={thisVertex} 
-            transform={`translate(${props.cx} ${props.cy})`}
-            onPointerDown={handleOnPointerDown} 
-            onPointerMove={handleOnPointerMove} 
-            onPointerUp={handleOnPointerUp} 
-        >
+        <g ref={thisVertex} 
+           transform={`translate(${props.cx} ${props.cy})`}
+           onPointerDown={handleOnPointerDown} 
+           onPointerMove={handleOnPointerMove} 
+           onPointerUp={handleOnPointerUp}>
+            {props.render(props.fill, props.label)}
+        </g>
+    );
+}
+
+const VertexDisplay = (props) => {
+    return (
+        <g>
             <Star 
                 outerRadius="10" 
                 fill={props.fill}
