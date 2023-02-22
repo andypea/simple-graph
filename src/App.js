@@ -196,7 +196,7 @@ const updateVerticesPositions = (
   return newVerticesPositions;
 };
 
-function SimpleGraph(props) {
+export function SimpleGraph({render = (fill, label) => <VertexDisplay fill={fill} label={label} />, width = 100, height = 100, ...props} = {}) {
   const [verticesPositions, setVerticesPositions] = useState(new Map());
 
   const timeStep = 0.005;
@@ -210,8 +210,8 @@ function SimpleGraph(props) {
       setVerticesPositions((oldVerticesPositions) =>
         updateVerticesPositions(
           oldVerticesPositions,
-          props.width,
-          props.height,
+          width,
+          height,
           friction,
           timeStep,
           props.edges,
@@ -234,7 +234,7 @@ function SimpleGraph(props) {
 
     start();
     return () => stop();
-  }, [props.width, props.height, props.edges, props.vertices]);
+  }, [width, height, props.edges, props.vertices]);
 
   const moveVertex = (id, position) => {
     setVerticesPositions((oldVerticesPositions) =>
@@ -265,12 +265,12 @@ function SimpleGraph(props) {
   };
 
   return (
-    <svg width={props.width} height={props.height}>
+    <svg width={width} height={height}>
       <rect
         x="0"
         y="0"
-        width={props.width}
-        height={props.height}
+        width={width}
+        height={height}
         fill="none"
         stroke="black"
       />
@@ -308,7 +308,7 @@ function SimpleGraph(props) {
                   unfreezeVertex={unfreezeVertex}
                   fill={v.fill}
                   label={v.label}
-                  render={props.render}
+                  render={render}
                 />
               );
             })}
