@@ -1,82 +1,4 @@
-import "./App.css";
 import { useState, useEffect, useRef } from "react";
-import { foo } from "./testModule.js";
-
-function App() {
-  return (
-    <div className="App">
-      <TestApp />
-      <p>{foo}</p>
-    </div>
-  );
-}
-
-const TestApp = () => {
-  const [vertices, setVertices] = useState([
-    { id: "One", fill: "red", label: "Foo" },
-    { id: "Two", fill: "orange", label: "Bar" },
-    { id: "Three", fill: "yellow", label: "Three" },
-    { id: "Four", fill: "green", label: "Four" },
-    { id: "Five", fill: "blue", label: "Five" },
-    { id: "A", fill: "indigo", label: "A" },
-    { id: "B", fill: "violet", label: "B" },
-    { id: "C", fill: "black", label: "C" },
-  ]);
-
-  const [edges, setEdges] = useState([
-    { id: "OneTwo", source: "One", target: "Two", length: 200 },
-    { id: "OneThree", source: "One", target: "Three", length: 200 },
-    { id: "OneFour", source: "One", target: "Four", length: 200 },
-    { id: "OneFive", source: "One", target: "Five", length: 200 },
-    { id: "TwoThree", source: "Two", target: "Three", length: 200 },
-    { id: "TwoFour", source: "Two", target: "Four", length: 200 },
-    { id: "TwoFive", source: "Two", target: "Five", length: 200 },
-    { id: "ThreeFour", source: "Three", target: "Four", length: 200 },
-    { id: "ThreeFive", source: "Three", target: "Five", length: 200 },
-    { id: "FourFive", source: "Four", target: "Five", length: 200 },
-    { id: "AB", source: "A", target: "B", length: 100 },
-    { id: "AC", source: "A", target: "C", length: 100 },
-    { id: "BC", source: "B", target: "C", length: 100 },
-  ]);
-
-  const [verticesText, setVerticesText] = useState(JSON.stringify(vertices));
-  const [edgesText, setEdgesText] = useState(JSON.stringify(edges));
-
-  const handleSubmit = (event) => {
-    setEdges(JSON.parse(edgesText));
-    setVertices(JSON.parse(verticesText));
-    event.preventDefault();
-  };
-
-  return (
-    <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-    >
-      <SimpleGraph
-        width="500"
-        height="500"
-        vertices={vertices}
-        edges={edges}
-        render={(fill, label) => <VertexDisplay fill={fill} label={label} />}
-      />
-      <form onSubmit={handleSubmit}>
-        <textarea
-          defaultValue={verticesText}
-          style={{ width: "40em", height: "10em" }}
-          onChange={(event) => setVerticesText(event.target.value)}
-        />
-        <textarea
-          defaultValue={edgesText}
-          style={{ width: "50em", height: "10em" }}
-          onChange={(event) => setEdgesText(event.target.value)}
-        />
-        <button type="submit" value="Update">
-          Update
-        </button>
-      </form>
-    </div>
-  );
-};
 
 const reconcileVertexPositions = (
   vertices,
@@ -454,4 +376,3 @@ const Star = ({
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
-export default App;
